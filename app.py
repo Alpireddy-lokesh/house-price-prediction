@@ -3,7 +3,10 @@ import pickle
 import pandas as pd
 
 # Load the trained model
-with open('output/house_model.pkl', 'rb') as file:
+import os
+model_path = os.path.join(os.path.dirname(__file__), 'house_model.pkl')
+with open(model_path, 'rb') as file:
+
     model = pickle.load(file)
 
 # Set Streamlit page configuration
