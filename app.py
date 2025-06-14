@@ -1,39 +1,41 @@
 import streamlit as st
 import pickle
-import pandas as pd
-
-# Load the trained model
 import os
-model_path = os.path.join(os.path.dirname(__file__), 'house_model.pkl')
-with open(model_path, 'rb') as file:
+import numpy as np
 
-    model = pickle.load(file)
+# Set the correct model path
+model_path = os.path.join("output", "house_model.pkl")
 
-# Set Streamlit page configuration
-st.set_page_config(page_title="🏠 House Price Prediction", layout="centered")
+# Check if model file exists
+if not os.path.exists(model_path):
+    st.error("❌ Model file not found at 'output/house_model.pkl'. Please make sure it is uploaded to GitHub and committed.")
+else:
+    with open(model_path, "rb") as file:
+        model = pickle.load(file)
 
-# App title
-st.title("🏠 House Price Prediction App")
-st.markdown("Enter the details of the house to predict its price 💰")
+    # Streamlit App UI
+    st.title("🏡 House Price Prediction App")
+    st.write("Enter the details below to predict the house price:")
 
-# Input sliders
-area = st.slider("Area (in sq. ft)", 500, 5000, 1000, step=100)
-bedrooms = st.slider("Number of Bedrooms", 1, 10, 3)
-bathrooms = st.slider("Number of Bathrooms", 1, 10, 2)
-parking = st.slider("Parking Capacity", 0, 5, 1)
+    # Inputs (adjust based on your model's features)
+    area = st.slider("Area (in sq ft)", 500, 10000, 1500)
+    bedrooms = st.selectbox("Bedrooms", [1, 2, 3, 4, 5])
+    bathrooms = st.selectbox("Bathrooms", [1, 2, 3, 4])
+    stories = st.selectbox("Stories", [1, 2, 3, 4])
+    parking = st.selectbox("Parking Capacity", [0, 1, 2, 3])
 
-# Predict button
-if st.button("Predict Price"):
-    # Create input dataframe with feature names to avoid warning
-    input_df = pd.DataFrame([[area, bedrooms, bathrooms, parking]],
-                            columns=["area", "bedrooms", "bathrooms", "parking"])
-    
-    # Make prediction
-    prediction = model.predict(input_df)[0]
-    
-    # Display result
-    st.success(f"🏷️ Estimated House Price: ₹ {int(prediction):,}")
+    # Add more features as needed...
+    # Example: mainroad, guestroom, basement, etc.
 
-# Footer
-st.markdown("---")
-st.markdown("🔧 Built by Lokesh | Powered by Streamlit + Scikit-learn")
+    # Button to predict
+    if st.button("Predict Price"):
+        try:
+            # Prepare the input data for prediction (update order/length as per model)
+            input_data = np.array([[area, bedrooms, bathrooms, stories, parking]])
+
+            # Predict
+            prediction = model.predict(input_data)[0]
+
+            st.success(f"💰 Estimated House Price: ₹ {prediction:,.2f}")
+        except Exception as e:
+            st.error(f"⚠️ Prediction failed: {e}")
